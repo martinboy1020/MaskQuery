@@ -1,7 +1,6 @@
 package com.martinboy.maskquery.fragment;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -11,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.martinboy.MapActivity;
 import com.martinboy.database.MaskEntity;
 import com.martinboy.database.MaskRepository;
 import com.martinboy.managertool.SharePreferenceManager;
@@ -125,10 +125,18 @@ public class DrugFragment extends Fragment {
         if (maskData != null) {
 
 //            Toast.makeText(this.getActivity(), "經度: " + mapDataEntity.getLatitude() + " 緯度" + mapDataEntity.getLongitude(), Toast.LENGTH_SHORT).show();
-            String data = String.format("geo:%s,%s?q=%s,%s (%s)", maskData.getLongitude(), maskData.getLatitude(), maskData.getLongitude(), maskData.getLatitude(), maskData.getName());
-            Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(data));
-            intent.setPackage("com.google.android.apps.maps");
-            startActivity(intent);
+//            String data = String.format("geo:%s,%s?q=%s,%s (%s)", maskData.getLongitude(), maskData.getLatitude(), maskData.getLongitude(), maskData.getLatitude(), maskData.getName());
+//            Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(data));
+//            intent.setPackage("com.google.android.apps.maps");
+//            startActivity(intent);
+            if (this.getActivity() != null) {
+                Intent intent = new Intent();
+                intent.setClass(this.getActivity(), MapActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putParcelable("maskData", maskData);
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
 
         } else {
 
@@ -151,7 +159,7 @@ public class DrugFragment extends Fragment {
             city = bundle.getString("city", "");
         }
 
-        if(query != null && !query.equals("")) {
+        if (query != null && !query.equals("")) {
             maskList = maskRepository.getMaskDataByCityAndSearchQuery(city, query);
         } else {
             maskList = maskRepository.getMaskDataByCity(city);

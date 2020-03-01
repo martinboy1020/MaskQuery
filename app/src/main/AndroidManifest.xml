@@ -14,6 +14,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAuPlSakySwXygd0UGCeitzWcKMekjkZv8"/>
+
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
@@ -27,6 +31,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name="com.martinboy.MapActivity"/>
+
     </application>
 
 </manifest>
