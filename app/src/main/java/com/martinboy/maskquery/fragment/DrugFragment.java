@@ -1,6 +1,9 @@
 package com.martinboy.maskquery.fragment;
 
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -10,10 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
 
-import com.martinboy.MapActivity;
 import com.martinboy.database.MaskEntity;
 import com.martinboy.database.MaskRepository;
-import com.martinboy.managertool.SharePreferenceManager;
 import com.martinboy.maskquery.R;
 import com.martinboy.maskquery.adapter.DrugAdapter;
 
@@ -38,7 +39,6 @@ public class DrugFragment extends Fragment {
     private String city, query;
     private List<MaskEntity> maskList;
     private LinearLayout layoutNoData;
-    private List<Object> mapList;
 
     @Nullable
     @Override
@@ -124,18 +124,23 @@ public class DrugFragment extends Fragment {
 
         if (maskData != null) {
 
-//            Toast.makeText(this.getActivity(), "經度: " + mapDataEntity.getLatitude() + " 緯度" + mapDataEntity.getLongitude(), Toast.LENGTH_SHORT).show();
-//            String data = String.format("geo:%s,%s?q=%s,%s (%s)", maskData.getLongitude(), maskData.getLatitude(), maskData.getLongitude(), maskData.getLatitude(), maskData.getName());
-//            Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(data));
-//            intent.setPackage("com.google.android.apps.maps");
-//            startActivity(intent);
-            if (this.getActivity() != null) {
-                Intent intent = new Intent();
-                intent.setClass(this.getActivity(), MapActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putParcelable("maskData", maskData);
-                intent.putExtras(bundle);
+            if (isGoogleMapsInstalled()) {
+
+                //            Toast.makeText(this.getActivity(), "經度: " + mapDataEntity.getLatitude() + " 緯度" + mapDataEntity.getLongitude(), Toast.LENGTH_SHORT).show();
+                String data = String.format("geo:%s,%s?q=%s,%s (%s)", maskData.getLongitude(), maskData.getLatitude(), maskData.getLongitude(), maskData.getLatitude(), maskData.getName());
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(data));
+                intent.setPackage("com.google.android.apps.maps");
                 startActivity(intent);
+//            if (this.getActivity() != null) {
+//                Intent intent = new Intent();
+//                intent.setClass(this.getActivity(), MapActivity.class);
+//                Bundle bundle = new Bundle();
+//                bundle.putParcelable("maskData", maskData);
+//                intent.putExtras(bundle);
+//                startActivity(intent);
+//            }
+            } else {
+                Toast.makeText(this.getActivity(), "請安裝GoogleMap App", Toast.LENGTH_SHORT).show();
             }
 
         } else {
@@ -165,8 +170,6 @@ public class DrugFragment extends Fragment {
             maskList = maskRepository.getMaskDataByCity(city);
         }
 
-        mapList = SharePreferenceManager.getObjectListToSharePreference(Objects.requireNonNull(getActivity()), "SP_MASK", "MapData");
-
         showLayout(maskList);
 
         if (drugAdapter != null)
@@ -188,7 +191,6 @@ public class DrugFragment extends Fragment {
             }
 
             maskList = maskRepository.getMaskDataByCity(city);
-            mapList = SharePreferenceManager.getObjectListToSharePreference(Objects.requireNonNull(getActivity()), "SP_MASK", "MapData");
 
             showLayout(maskList);
 
@@ -231,6 +233,14 @@ public class DrugFragment extends Fragment {
 
     }
 
+    private boolean isGoogleMapsInstalled() {
+        try {
+            ApplicationInfo info = getActivity().getPackageManager().getApplicationInfo("com.google.android.apps.maps", 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
 
     @Override
     public void onDestroy() {
